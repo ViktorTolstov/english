@@ -76,3 +76,11 @@ def add_post(text,images,docs,videos,dialog,time):
         connect.commit()
     connect.close()
     print(get_db("users"))
+
+def get_db(table):
+    connect = sqlite3.connect(database)
+    cursor = connect.cursor()
+    cursor.execute("SELECT * FROM "+table)
+    result = cursor.fetchall()
+    connect.close()
+    return result

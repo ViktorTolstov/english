@@ -8,7 +8,8 @@ import json
 import re
 #from flask_sslify import SSLify
 import vk
-import random
+# import random
+import database
 
 app = Flask(__name__)
 #sslify = SSLify(app)
@@ -25,7 +26,14 @@ vk_api = vk.API(session)
 @app.route('/', methods=['POST', 'GET'])
 def bot():
     r = request.get_json()
-    print(r)
+    # print(r["object"]["message"]["attachments"])
+    text = r["object"]["message"]
+    attachments = r["object"]["message"]["attachments"]
+    images = []
+    videos = []
+    docs = []
+    for attachment in attachments:
+        if attachment
     return "ok"
     # message = [
     #     'Пусть в Новом году сбывается всё хорошее! 🎅',
