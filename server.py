@@ -26,14 +26,18 @@ vk_api = vk.API(session)
 @app.route('/', methods=['POST', 'GET'])
 def bot():
     r = request.get_json()
-    # print(r["object"]["message"]["attachments"])
-    text = r["object"]["message"]
+    text = r["object"]["message"]["text"]
     attachments = r["object"]["message"]["attachments"]
+    print(text)
+    print(attachments)
     images = []
     videos = []
     docs = []
     for attachment in attachments:
-        if attachment
+        if attachment["type"] == "photo":
+            images.append(attachment["photo"]]["sizes"][-1]["url"])
+        if attachment["type"] == "doc":
+            docs.append(attachment["doc"]]["sizes"]["url"])
     return "ok"
     # message = [
     #     'Пусть в Новом году сбывается всё хорошее! 🎅',
