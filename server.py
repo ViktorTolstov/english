@@ -28,16 +28,17 @@ def bot():
     r = request.get_json()
     text = r["object"]["message"]["text"]
     attachments = r["object"]["message"]["attachments"]
-    print(text)
-    print(attachments)
     images = []
     videos = []
     docs = []
     for attachment in attachments:
         if attachment["type"] == "photo":
-            images.append(attachment["photo"]]["sizes"][-1]["url"])
+            images.append(attachment["photo"]["sizes"][-1]["url"])
         if attachment["type"] == "doc":
-            docs.append(attachment["doc"]]["sizes"]["url"])
+            docs.append(attachment["doc"]["url"])
+        if attachment["type"] == "video":
+            videos.append("https://vk.com/video"+str(attachment["video"]["owner_id"])+"_"+str(attachment["video"]["id"]))
+    database.add_post(text,images,docs,videos,"dialog","time")
     return "ok"
     # message = [
     #     'Пусть в Новом году сбывается всё хорошее! 🎅',

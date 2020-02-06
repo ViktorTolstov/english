@@ -39,7 +39,7 @@ def init_db():
     );
     """)
     connect.close()
-
+    
 def add_post(text,images,docs,videos,dialog,time):
     connect = sqlite3.connect(database)
     cursor = connect.cursor()
@@ -48,7 +48,7 @@ def add_post(text,images,docs,videos,dialog,time):
         post_id = str(cursor.fetchall()[-1][0] + 1)
     except:
         post_id = 1
-    cursor.execute("insert into posts values ("+str(post_id)+",'"+text+"','"+dialog+"','"+time+"')")
+    cursor.execute("insert into posts values ("+str(post_id)+",'"+text+"','"+dialog+"','"+time+"','status')")
     connect.commit()
     for image in images:
         cursor.execute("SELECT id FROM images")
@@ -56,7 +56,7 @@ def add_post(text,images,docs,videos,dialog,time):
             img_id = str(cursor.fetchall()[-1][0] + 1)
         except:
             img_id = 1
-        cursor.execute("insert into images values ("+str(img_id)+",'"+text+"',"+str(post_id)+")")
+        cursor.execute("insert into images values ("+str(img_id)+",'"+image+"',"+str(post_id)+")")
         connect.commit()
     for video in videos:
         cursor.execute("SELECT id FROM video")
@@ -64,7 +64,7 @@ def add_post(text,images,docs,videos,dialog,time):
             vid_id = str(cursor.fetchall()[-1][0] + 1)
         except:
             vid_id = 1
-        cursor.execute("insert into video values ("+str(vid_id)+",'"+text+"',"+str(post_id)+")")
+        cursor.execute("insert into video values ("+str(vid_id)+",'"+video+"',"+str(post_id)+")")
         connect.commit()
     for doc in docs:
         cursor.execute("SELECT id FROM docs")
@@ -72,10 +72,13 @@ def add_post(text,images,docs,videos,dialog,time):
             doc_id = str(cursor.fetchall()[-1][0] + 1)
         except:
             doc_id = 1
-        cursor.execute("insert into docs values ("+str(doc_id)+",'"+text+"',"+str(post_id)+")")
+        cursor.execute("insert into docs values ("+str(doc_id)+",'"+doc+"',"+str(post_id)+")")
         connect.commit()
     connect.close()
-    print(get_db("users"))
+    print(get_db("posts"))
+    print(get_db("images"))
+    print(get_db("video"))
+    print(get_db("docs"))
 
 def get_db(table):
     connect = sqlite3.connect(database)
