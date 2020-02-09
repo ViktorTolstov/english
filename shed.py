@@ -14,3 +14,5 @@ def scheduled_job():
     print('This job is run every weekday at 10am.')
 
 sched.start()
+print(123)
+sched.stop()

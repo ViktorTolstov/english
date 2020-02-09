@@ -10,6 +10,12 @@ import re
 import vk
 # import random
 import database
+import time
+import math
+# from apscheduler.schedulers.blocking import BlockingScheduler
+# from datetime import datetime
+
+# now = datetime.strftime(datetime.now(), "%Y.%m.%d %H:%M:%S")
 
 app = Flask(__name__)
 #sslify = SSLify(app)
@@ -23,48 +29,41 @@ vk_api = vk.API(session)
 #'post_owner_id': -188996934, 'post_id': 1}, 'group_id': 188996934, 
 #'event_id': '33f4566143ab8c5975b7b41e76bb26f4fbd84ecc'}
 
+# print(vk_api.messages.getConversations(v=5.103))
+
 @app.route('/', methods=['POST', 'GET'])
 def bot():
-    r = request.get_json()
-    text = r["object"]["message"]["text"]
-    attachments = r["object"]["message"]["attachments"]
-    images = []
-    videos = []
-    docs = []
-    for attachment in attachments:
-        if attachment["type"] == "photo":
-            images.append(attachment["photo"]["sizes"][-1]["url"])
-        if attachment["type"] == "doc":
-            docs.append(attachment["doc"]["url"])
-        if attachment["type"] == "video":
-            videos.append("https://vk.com/video"+str(attachment["video"]["owner_id"])+"_"+str(attachment["video"]["id"]))
-    database.add_post(text,images,docs,videos,"dialog","time")
+    body = request.get_json()
+    text = body["object"]["message"]["text"]
+    attachments = body["object"]["message"]["attachments"]
+    attachment = []
+    for index in attachments:
+        if index["type"] == "photo":
+            attachment.append("photo"+str(index["photo"]["owner_id"])+"_"+str(index["photo"]["id"]))
+        if index["type"] == "doc":
+            attachment.append("doc"+str(index["doc"]["owner_id"])+"_"+str(index["doc"]["id"]))
+        if index["type"] == "video":
+            attachment.append("video"+str(index["video"]["owner_id"])+"_"+str(index["video"]["id"]))
+    database.add_post(text,attachment,"dialog","time")
+    user_id = body["object"]["message"]["from_id"]
+    random_id = int(round(time.time()))
+    post = database.get_post()
+    attachment = ""
+    for index in post["attachments"]:
+        attachment += index + ","
+    vk_api.messages.send(chat_id=1, message=post["text"],attachment=attachment, random_id=random_id,v=5.103)
     return "ok"
-    # message = [
-    #     'Пусть в Новом году сбывается всё хорошее! 🎅',
-    #     'В наступающем году всё обязательно сбудется! 🎄',
-    #     'В Новом году всё получится! 🎁'
-    # ]
-    # if r["type"] == 'wall_reply_new' and r["object"]["attachments"][0]["type"] == 'sticker' and r["object"]["post_id"]==93:
-    #     post_id = r["object"]["post_id"]
-    #     reply_to_comment = r["object"]["id"]
-    #     #message = "pam"
-    #     guid = int(str(r["object"]["date"])+str(abs(r["object"]["from_id"])))
-    #     owner_id = r["object"]["post_owner_id"]
-    #     num = 700
-    #     while num == 700 or num == 670 or num == 671 or num == 672:
-    #         num = random.randint(640,701)
-    #     attachments = "photo-146739653_457239"+str(num)
-    #     vk_api.wall.createComment(
-    #         message = message[random.randint(0,2)],
-    #         post_id=post_id,
-    #         attachments = attachments,
-    #         owner_id = owner_id,
-    #         reply_to_comment=reply_to_comment,
-    #         guid = guid,
-    #         v = 5.103
-    #     )
-    # return 'ok'
+
+
+# sched = BlockingScheduler()
+# @sched.scheduled_job('cron', hour=2, minute=47)  # запускать c понедельника по пятницу в 10.00
+# def scheduled_job():
+#     post = database.get_post()
+#     attachment = ""
+#     for index in post["attachments"]:
+#         attachment += index + ","
+#     vk_api.messages.send(chat_id=1, message=post["text"],attachment=attachment, random_id=random_id,v=5.103)
+#     print('This job is run every weekday at 10am.')
 
 # @app.route('/', methods=['POST', 'GET'])
 def init():
@@ -76,3 +75,4 @@ if __name__ == '__main__':
 	#port = int(os.environ.get("PORT", 5000))
 	# app.run(host='0.0.0.0', port=port)
     app.run()
+    # sched.start()

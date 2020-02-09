@@ -15,32 +15,16 @@ def init_db():
     );
     """)
     cursor.execute("""
-    CREATE table images (
+    CREATE table attachment (
         id integer primary key,
-        img_url text,
-        post_id integer,
-        FOREIGN KEY (post_id) REFERENCES posts (id)
-    );
-    """)
-    cursor.execute("""
-    CREATE table docs (
-        id integer primary key,
-        doc_url text,
-        post_id integer,
-        FOREIGN KEY (post_id) REFERENCES posts (id)
-    );
-    """)
-    cursor.execute("""
-    CREATE table video (
-        id integer primary key,
-        vid_url text,
+        url text,
         post_id integer,
         FOREIGN KEY (post_id) REFERENCES posts (id)
     );
     """)
     connect.close()
-    
-def add_post(text,images,docs,videos,dialog,time):
+
+def add_post(text,attachments,dialog,time):
     connect = sqlite3.connect(database)
     cursor = connect.cursor()
     cursor.execute("SELECT id FROM posts")
@@ -50,35 +34,43 @@ def add_post(text,images,docs,videos,dialog,time):
         post_id = 1
     cursor.execute("insert into posts values ("+str(post_id)+",'"+text+"','"+dialog+"','"+time+"','status')")
     connect.commit()
-    for image in images:
-        cursor.execute("SELECT id FROM images")
+    for attachment in attachments:
+        cursor.execute("SELECT id FROM attachment")
         try:
             img_id = str(cursor.fetchall()[-1][0] + 1)
         except:
             img_id = 1
-        cursor.execute("insert into images values ("+str(img_id)+",'"+image+"',"+str(post_id)+")")
-        connect.commit()
-    for video in videos:
-        cursor.execute("SELECT id FROM video")
-        try:
-            vid_id = str(cursor.fetchall()[-1][0] + 1)
-        except:
-            vid_id = 1
-        cursor.execute("insert into video values ("+str(vid_id)+",'"+video+"',"+str(post_id)+")")
-        connect.commit()
-    for doc in docs:
-        cursor.execute("SELECT id FROM docs")
-        try:
-            doc_id = str(cursor.fetchall()[-1][0] + 1)
-        except:
-            doc_id = 1
-        cursor.execute("insert into docs values ("+str(doc_id)+",'"+doc+"',"+str(post_id)+")")
+        cursor.execute("insert into attachment values ("+str(img_id)+",'"+attachment+"',"+str(post_id)+")")
         connect.commit()
     connect.close()
-    print(get_db("posts"))
-    print(get_db("images"))
-    print(get_db("video"))
-    print(get_db("docs"))
+
+def get_post():
+    connect = sqlite3.connect(database)
+    cursor = connect.cursor()
+    cursor = connect.cursor()
+    cursor.execute("SELECT id FROM posts")
+    test_id = cursor.fetchall()[-1][0]
+    cursor.execute("SELECT * FROM posts where id="+str(test_id))
+    res = cursor.fetchall()
+    connect.close()
+    text = res[0][1]
+    attachments = get_attachment(res[0][0])
+    post = {
+        "text":text,
+        "attachments":attachments
+    }
+    return post
+
+def get_attachment(post_id):
+    connect = sqlite3.connect(database)
+    cursor = connect.cursor()
+    cursor.execute("SELECT * FROM attachment where post_id="+str(post_id))
+    res = cursor.fetchall()
+    connect.close()
+    attachments = []
+    for attachment in res:
+        attachments.append(attachment[1])
+    return attachments
 
 def get_db(table):
     connect = sqlite3.connect(database)
