@@ -46,13 +46,18 @@ def bot():
             attachment.append("video"+str(index["video"]["owner_id"])+"_"+str(index["video"]["id"]))
     database.add_post(text,attachment,"dialog","time")
     user_id = body["object"]["message"]["from_id"]
-    random_id = int(round(time.time()))
-    post = database.get_post()
-    attachment = ""
-    for index in post["attachments"]:
-        attachment += index + ","
-    vk_api.messages.send(chat_id=1, message=post["text"],attachment=attachment, random_id=random_id,v=5.103)
+    random_id = int(str(round(time.time()))+str(user_id))
+    text = """
+    Запись успешно добавлена, выберете группу для которой эта запись предназначена.
+    Если вы не выберете группу, запись не будет опубликована
+    """
+    vk_api.messages.send(user_id=user_id, message=text, random_id=random_id,v=5.103)
     return "ok"
+
+@app.route('/get_db', methods=['GET'])
+def get_db():
+    post = database.get_post()
+    return post
 
 
 # sched = BlockingScheduler()
