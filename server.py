@@ -34,6 +34,28 @@ vk_api = vk.API(session)
 @app.route('/', methods=['POST', 'GET'])
 def bot():
     body = request.get_json()
+    user_id = body["object"]["message"]["from_id"]
+    if "payload" in body["object"]["message"]:
+			if body["object"]["message"]["payload"] == '{"command":"start"}':
+                text = "Напиши мне новый пост, который ты хочешь добавить в очередь публикаций"
+                random_id = int(str(round(time.time()))+str(user_id))
+				vk_api.messages.send(user_id=user_id, random_id=random_id,v=5.103)
+                return "ok"
+			elif body["object"]["message"]["payload"] == '{"command":"group2"}':
+				update_group("group1")
+			else:
+				user_id = body["object"]["message"]["from_id"]
+				group = body["object"]["message"]["payload"]
+				database.add_member(group,user_id)
+				delete_button(request)
+		else:
+			new_post(body)1
+
+def update_group(group):
+
+    database.update
+
+def new_post(body):
     text = body["object"]["message"]["text"]
     attachments = body["object"]["message"]["attachments"]
     attachment = []
@@ -51,7 +73,44 @@ def bot():
     Запись успешно добавлена, выберете группу для которой эта запись предназначена.
     Если вы не выберете группу, запись не будет опубликована
     """
-    vk_api.messages.send(user_id=user_id, message=text, random_id=random_id,v=5.103)
+    keyboard = {
+		"one_time": False,
+		"buttons": [
+			[{
+				"action": {
+					"type": "text",
+					"payload": '{"command":"group2"}',
+					"label": "Группа 1"
+				},
+				"color": "primal"
+			}],
+            [{
+				"action": {
+					"type": "text",
+					"payload": '{"command":"group3"}',
+					"label": "Группа 2"
+				},
+				"color": "primal"
+			}],
+            [{
+				"action": {
+					"type": "text",
+					"payload": '{"command":"group4"}',
+					"label": "Группа 3"
+				},
+				"color": "primal"
+			}],
+            [{
+				"action": {
+					"type": "text",
+					"payload": '{"command":"group5"}',
+					"label": "Группа 4"
+				},
+				"color": "primal"
+			}]
+		]
+	}
+    vk_api.messages.send(user_id=user_id, message=text,keyboard=json.dumps(keyboard), random_id=random_id,v=5.103)
     return "ok"
 
 @app.route('/get_db', methods=['GET'])
