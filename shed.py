@@ -14,7 +14,27 @@ vk_api = vk.API(session)
 
 sched = BlockingScheduler()
 
-@sched.scheduled_job('cron', hour=15, minute=34)  # запускать c понедельника по пятницу в 10.00
+@sched.scheduled_job('cron', hour=10, minute=00)  # запускать c понедельника по пятницу в 10.00
+def scheduled_job():
+    post = requests.get('http://localhost:5000/get_db').json()
+    random_id = int(round(time.time()))
+    attachment = ""
+    for index in post["attachments"]:
+        attachment += index + ","
+    vk_api.messages.send(chat_id=1, message=post["text"],attachment=attachment, random_id=random_id,v=5.103)
+    print('This job is run every weekday at 10am.')
+
+@sched.scheduled_job('cron', hour=14, minute=00)  # запускать c понедельника по пятницу в 10.00
+def scheduled_job():
+    post = requests.get('http://localhost:5000/get_db').json()
+    random_id = int(round(time.time()))
+    attachment = ""
+    for index in post["attachments"]:
+        attachment += index + ","
+    vk_api.messages.send(chat_id=1, message=post["text"],attachment=attachment, random_id=random_id,v=5.103)
+    print('This job is run every weekday at 10am.')
+
+@sched.scheduled_job('cron', hour=19, minute=00)  # запускать c понедельника по пятницу в 10.00
 def scheduled_job():
     post = requests.get('http://localhost:5000/get_db').json()
     random_id = int(round(time.time()))

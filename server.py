@@ -36,24 +36,98 @@ def bot():
     body = request.get_json()
     user_id = body["object"]["message"]["from_id"]
     if "payload" in body["object"]["message"]:
-			if body["object"]["message"]["payload"] == '{"command":"start"}':
-                text = "Напиши мне новый пост, который ты хочешь добавить в очередь публикаций"
-                random_id = int(str(round(time.time()))+str(user_id))
-				vk_api.messages.send(user_id=user_id, random_id=random_id,v=5.103)
-                return "ok"
-			elif body["object"]["message"]["payload"] == '{"command":"group2"}':
-				update_group("group1")
-			else:
-				user_id = body["object"]["message"]["from_id"]
-				group = body["object"]["message"]["payload"]
-				database.add_member(group,user_id)
-				delete_button(request)
-		else:
-			new_post(body)1
+		if body["object"]["message"]["payload"] == '{"command":"start"}':
+            text = "Напиши мне новый пост, который ты хочешь добавить в очередь публикаций"
+            random_id = int(str(round(time.time()))+str(user_id))
+			vk_api.messages.send(user_id=user_id, random_id=random_id,v=5.103)
+            return "ok"
+		elif body["object"]["message"]["payload"] == '{"command":"group2"}':
+			update_group("group2",body)
+        elif body["object"]["message"]["payload"] == '{"command":"group3"}':
+			update_group("group3",body)
+        elif body["object"]["message"]["payload"] == '{"command":"group4"}':
+			update_group("group4",body)
+        elif body["object"]["message"]["payload"] == '{"command":"group5"}':
+            update_group("group5",body)
+        elif body["object"]["message"]["payload"] == '{"command":"morning"}':
+            update_time("morning",body)
+        elif body["object"]["message"]["payload"] == '{"command":"afternoon"}':
+            update_time("afternoon",body)
+        elif body["object"]["message"]["payload"] == '{"command":"evening"}':
+            update_time("evening",body)
+	elif body["object"]["message"]["text"].rfind("дата-")!=-1:
+        day = body["object"]["message"]["text"][5:7:1]
+        mounth = body["object"]["message"]["text"][8:10:1]
+        year = body["object"]["message"]["text"][11:15:1]
+        update_date(day,mounth,year,body)
+	else:
+		new_post(body)
 
-def update_group(group):
+def update_group(group,body):
+    database.update_group(group)
+    user_id = body["object"]["message"]["from_id"]
+    random_id = int(str(round(time.time()))+str(user_id))
+    text = """
+    Время успешно выбрано
 
-    database.update
+    Напиши мне новый пост, который ты хочешь добавить в очередь публикаций
+    """
+    vk_api.messages.send(user_id=user_id, message=text, random_id=random_id,v=5.103)
+    return "ok"
+
+def update_time(time,body):
+    database.update_time(time)
+    user_id = body["object"]["message"]["from_id"]
+    random_id = int(str(round(time.time()))+str(user_id))
+    text = """
+    Группа успешно установлена на """+group+"""
+    Напиши дату публикации в формате сообщения:
+    дата-dd.mm.yyyy
+    """
+    vk_api.messages.send(user_id=user_id, message=text, random_id=random_id,v=5.103)
+    return "ok"
+
+def update_date(day,mounth,year,body):
+    database.update_date(day,mounth,year)
+    user_id = body["object"]["message"]["from_id"]
+    random_id = int(str(round(time.time()))+str(user_id))
+    text = """
+    Дата успешно установлена для последнего поста
+    Выбери время публикации из предложеного списка
+    """
+    keyboard = {
+		"one_time": False,
+		"buttons": [
+			[{
+				"action": {
+					"type": "text",
+					"payload": '{"command":"morning"}',
+					"label": "Утро (10.00)"
+				},
+				"color": "primal"
+			}],
+            [{
+				"action": {
+					"type": "text",
+					"payload": '{"command":"afternoon"}',
+					"label": "День (14.00)"
+				},
+				"color": "primal"
+			}],
+            [{
+				"action": {
+					"type": "text",
+					"payload": '{"command":"evening"}',
+					"label": "Вечер (19.00)"
+				},
+				"color": "primal"
+			}]
+		]
+	}
+    vk_api.messages.send(user_id=user_id, message=text,keyboard=json.dumps(keyboard), random_id=random_id,v=5.103)
+    return "ok"
+
+
 
 def new_post(body):
     text = body["object"]["message"]["text"]
@@ -117,17 +191,6 @@ def new_post(body):
 def get_db():
     post = database.get_post()
     return post
-
-
-# sched = BlockingScheduler()
-# @sched.scheduled_job('cron', hour=2, minute=47)  # запускать c понедельника по пятницу в 10.00
-# def scheduled_job():
-#     post = database.get_post()
-#     attachment = ""
-#     for index in post["attachments"]:
-#         attachment += index + ","
-#     vk_api.messages.send(chat_id=1, message=post["text"],attachment=attachment, random_id=random_id,v=5.103)
-#     print('This job is run every weekday at 10am.')
 
 # @app.route('/', methods=['POST', 'GET'])
 def init():
