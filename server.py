@@ -31,22 +31,28 @@ vk_api = vk.API(session)
 
 # print(vk_api.messages.getConversations(v=5.103))
 
+# @app.route('/', methods=['POST', 'GET'])
+def init():
+	body = request.get_json()
+	if body == { "type": "confirmation", "group_id": 188996934 }:
+		return "8806c6d6"
+
 @app.route('/', methods=['POST', 'GET'])
 def bot():
     body = request.get_json()
     user_id = body["object"]["message"]["from_id"]
     if "payload" in body["object"]["message"]:
-		if body["object"]["message"]["payload"] == '{"command":"start"}':
+        if body["object"]["message"]["payload"] == '{"command":"start"}':
             text = "Напиши мне новый пост, который ты хочешь добавить в очередь публикаций"
             random_id = int(str(round(time.time()))+str(user_id))
-			vk_api.messages.send(user_id=user_id, random_id=random_id,v=5.103)
+            vk_api.messages.send(user_id=user_id, random_id=random_id,v=5.103)
             return "ok"
-		elif body["object"]["message"]["payload"] == '{"command":"group2"}':
-			update_group("group2",body)
+        elif body["object"]["message"]["payload"] == '{"command":"group2"}':
+            update_group("group2",body)
         elif body["object"]["message"]["payload"] == '{"command":"group3"}':
-			update_group("group3",body)
+            update_group("group3",body)
         elif body["object"]["message"]["payload"] == '{"command":"group4"}':
-			update_group("group4",body)
+            update_group("group4",body)
         elif body["object"]["message"]["payload"] == '{"command":"group5"}':
             update_group("group5",body)
         elif body["object"]["message"]["payload"] == '{"command":"morning"}':
@@ -55,16 +61,16 @@ def bot():
             update_time("afternoon",body)
         elif body["object"]["message"]["payload"] == '{"command":"evening"}':
             update_time("evening",body)
-	elif body["object"]["message"]["text"].rfind("дата-")!=-1:
+    elif body["object"]["message"]["text"].rfind("дата-")!=-1:
         day = body["object"]["message"]["text"][5:7:1]
         mounth = body["object"]["message"]["text"][8:10:1]
         year = body["object"]["message"]["text"][11:15:1]
         update_date(day,mounth,year,body)
-	else:
-		new_post(body)
+    else:
+        new_post(body)
 
-def update_group(group,body):
-    database.update_group(group)
+def update_time(post_time,body):
+    database.update_time(post_time)
     user_id = body["object"]["message"]["from_id"]
     random_id = int(str(round(time.time()))+str(user_id))
     text = """
@@ -75,8 +81,8 @@ def update_group(group,body):
     vk_api.messages.send(user_id=user_id, message=text, random_id=random_id,v=5.103)
     return "ok"
 
-def update_time(time,body):
-    database.update_time(time)
+def update_group(group,body):
+    database.update_group(group)
     user_id = body["object"]["message"]["from_id"]
     random_id = int(str(round(time.time()))+str(user_id))
     text = """
@@ -96,7 +102,7 @@ def update_date(day,mounth,year,body):
     Выбери время публикации из предложеного списка
     """
     keyboard = {
-		"one_time": False,
+		"one_time": True,
 		"buttons": [
 			[{
 				"action": {
@@ -104,7 +110,7 @@ def update_date(day,mounth,year,body):
 					"payload": '{"command":"morning"}',
 					"label": "Утро (10.00)"
 				},
-				"color": "primal"
+				"color": "primary"
 			}],
             [{
 				"action": {
@@ -112,7 +118,7 @@ def update_date(day,mounth,year,body):
 					"payload": '{"command":"afternoon"}',
 					"label": "День (14.00)"
 				},
-				"color": "primal"
+				"color": "primary"
 			}],
             [{
 				"action": {
@@ -120,7 +126,7 @@ def update_date(day,mounth,year,body):
 					"payload": '{"command":"evening"}',
 					"label": "Вечер (19.00)"
 				},
-				"color": "primal"
+				"color": "primary"
 			}]
 		]
 	}
@@ -140,7 +146,7 @@ def new_post(body):
             attachment.append("doc"+str(index["doc"]["owner_id"])+"_"+str(index["doc"]["id"]))
         if index["type"] == "video":
             attachment.append("video"+str(index["video"]["owner_id"])+"_"+str(index["video"]["id"]))
-    database.add_post(text,attachment,"dialog","time")
+    database.add_post(text,attachment)
     user_id = body["object"]["message"]["from_id"]
     random_id = int(str(round(time.time()))+str(user_id))
     text = """
@@ -148,7 +154,7 @@ def new_post(body):
     Если вы не выберете группу, запись не будет опубликована
     """
     keyboard = {
-		"one_time": False,
+		"one_time": True,
 		"buttons": [
 			[{
 				"action": {
@@ -156,7 +162,7 @@ def new_post(body):
 					"payload": '{"command":"group2"}',
 					"label": "Группа 1"
 				},
-				"color": "primal"
+				"color": "primary"
 			}],
             [{
 				"action": {
@@ -164,7 +170,7 @@ def new_post(body):
 					"payload": '{"command":"group3"}',
 					"label": "Группа 2"
 				},
-				"color": "primal"
+				"color": "primary"
 			}],
             [{
 				"action": {
@@ -172,7 +178,7 @@ def new_post(body):
 					"payload": '{"command":"group4"}',
 					"label": "Группа 3"
 				},
-				"color": "primal"
+				"color": "primary"
 			}],
             [{
 				"action": {
@@ -180,7 +186,7 @@ def new_post(body):
 					"payload": '{"command":"group5"}',
 					"label": "Группа 4"
 				},
-				"color": "primal"
+				"color": "primary"
 			}]
 		]
 	}
@@ -192,11 +198,6 @@ def get_db():
     post = database.get_post()
     return post
 
-# @app.route('/', methods=['POST', 'GET'])
-def init():
-	body = request.get_json()
-	if body == { "type": "confirmation", "group_id": 188996934 }:
-		return "8806c6d6"
 
 if __name__ == '__main__': 
 	#port = int(os.environ.get("PORT", 5000))

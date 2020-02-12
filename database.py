@@ -1,4 +1,6 @@
 import sqlite3
+import datetime
+import time
 
 database = 'database.sqlite'
 
@@ -24,7 +26,7 @@ def init_db():
     """)
     connect.close()
 
-def add_post(text,attachments,dialog,time):
+def add_post(text,attachments):
     connect = sqlite3.connect(database)
     cursor = connect.cursor()
     cursor.execute("SELECT id FROM posts")
@@ -32,7 +34,7 @@ def add_post(text,attachments,dialog,time):
         post_id = str(cursor.fetchall()[-1][0] + 1)
     except:
         post_id = 1
-    cursor.execute("insert into posts values ("+str(post_id)+",'"+text+"','"+dialog+"','"+time+"')")
+    cursor.execute("insert into posts values ("+str(post_id)+",'"+text+"','time','date+','dialog')")
     connect.commit()
     for attachment in attachments:
         cursor.execute("SELECT id FROM attachment")
@@ -57,13 +59,21 @@ def get_post():
     for i in range(0,len(res)):
         res[i] = list(res[i])
         text = res[i][1]
+        time = res[i][2]
+        date = str(res[i][3])
+        group = res[i][4]
         attachments = get_attachment(res[i][0])
         post = {
             "text":text,
-            "attachments":attachments
+            "attachments":attachments,
+            "time":time,
+            "date":date,
+            "group":group
         }
+        print(post)
         posts.append(post)
-    return posts
+        posts_json ={"posts":posts}
+    return posts_json
 
 def get_attachment(post_id):
     connect = sqlite3.connect(database)
@@ -94,7 +104,7 @@ def update_group(group):
     connect.close()
 
 def update_date(day,mounth,year):
-    new_date = datetime.date(year, mounth, day)
+    new_date = str(datetime.date(int(year), int(mounth), int(day)))
     connect = sqlite3.connect(database)
     cursor = connect.cursor()
     cursor.execute("SELECT id FROM posts")
@@ -103,12 +113,12 @@ def update_date(day,mounth,year):
     connect.commit()
     connect.close()
 
-def update_time(time):
+def update_time(post_time):
     connect = sqlite3.connect(database)
     cursor = connect.cursor()
     cursor.execute("SELECT id FROM posts")
     last_id = cursor.fetchall()[-1][0]
-    cursor.execute("UPDATE posts SET time="+time+" where id="+str(last_id))
+    cursor.execute("UPDATE posts SET time='"+post_time+"' where id="+str(last_id))
     connect.commit()
     connect.close()
 
@@ -118,4 +128,6 @@ def get_db(table):
     cursor.execute("SELECT * FROM "+table)
     result = cursor.fetchall()
     connect.close()
-    return result
+    print(result)
+
+# get_db("posts")
