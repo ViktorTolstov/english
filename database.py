@@ -26,6 +26,8 @@ def init_db():
     """)
     connect.close()
 
+# init_db()
+
 def add_post(text,attachments):
     connect = sqlite3.connect(database)
     cursor = connect.cursor()
@@ -34,7 +36,7 @@ def add_post(text,attachments):
         post_id = str(cursor.fetchall()[-1][0] + 1)
     except:
         post_id = 1
-    cursor.execute("insert into posts values ("+str(post_id)+",'"+text+"','time','date+','dialog')")
+    cursor.execute("insert into posts values ("+str(post_id)+",'"+text+"','time','date','dialog')")
     connect.commit()
     for attachment in attachments:
         cursor.execute("SELECT id FROM attachment")
@@ -70,7 +72,6 @@ def get_post():
             "date":date,
             "group":group
         }
-        print(post)
         posts.append(post)
         posts_json ={"posts":posts}
     return posts_json
@@ -109,7 +110,7 @@ def update_date(day,mounth,year):
     cursor = connect.cursor()
     cursor.execute("SELECT id FROM posts")
     last_id = cursor.fetchall()[-1][0]
-    cursor.execute("UPDATE posts SET date="+str(new_date)+" where id="+str(last_id))
+    cursor.execute("UPDATE posts SET date='"+new_date+"' where id="+str(last_id))
     connect.commit()
     connect.close()
 
@@ -130,4 +131,5 @@ def get_db(table):
     connect.close()
     print(result)
 
+# update_date(11,11,1111)
 # get_db("posts")

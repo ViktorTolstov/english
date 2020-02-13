@@ -1,0 +1,11 @@
+flask
+
+flask_sslify
+
+requests
+
+flask_cors
+
+vk
+
+requests

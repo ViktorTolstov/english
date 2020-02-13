@@ -49,25 +49,34 @@ def bot():
             return "ok"
         elif body["object"]["message"]["payload"] == '{"command":"group2"}':
             update_group("group2",body)
+            return "ok"
         elif body["object"]["message"]["payload"] == '{"command":"group3"}':
             update_group("group3",body)
+            return "ok"
         elif body["object"]["message"]["payload"] == '{"command":"group4"}':
             update_group("group4",body)
+            return "ok"
         elif body["object"]["message"]["payload"] == '{"command":"group5"}':
             update_group("group5",body)
+            return "ok"
         elif body["object"]["message"]["payload"] == '{"command":"morning"}':
             update_time("morning",body)
+            return "ok"
         elif body["object"]["message"]["payload"] == '{"command":"afternoon"}':
             update_time("afternoon",body)
+            return "ok"
         elif body["object"]["message"]["payload"] == '{"command":"evening"}':
             update_time("evening",body)
+            return "ok"
     elif body["object"]["message"]["text"].rfind("дата-")!=-1:
         day = body["object"]["message"]["text"][5:7:1]
         mounth = body["object"]["message"]["text"][8:10:1]
         year = body["object"]["message"]["text"][11:15:1]
         update_date(day,mounth,year,body)
+        return "ok"
     else:
         new_post(body)
+        return "ok"
 
 def update_time(post_time,body):
     database.update_time(post_time)
@@ -79,7 +88,6 @@ def update_time(post_time,body):
     Напиши мне новый пост, который ты хочешь добавить в очередь публикаций
     """
     vk_api.messages.send(user_id=user_id, message=text, random_id=random_id,v=5.103)
-    return "ok"
 
 def update_group(group,body):
     database.update_group(group)
@@ -91,7 +99,6 @@ def update_group(group,body):
     дата-dd.mm.yyyy
     """
     vk_api.messages.send(user_id=user_id, message=text, random_id=random_id,v=5.103)
-    return "ok"
 
 def update_date(day,mounth,year,body):
     database.update_date(day,mounth,year)
