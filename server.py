@@ -34,6 +34,7 @@ vk_api = vk.API(session)
 @app.route('/', methods=['POST', 'GET'])
 def init():
 	body = request.get_json()
+	print(body)
 	if body == { "type": "confirmation", "group_id": 188996934 }:
 		return "8806c6d6"
 
