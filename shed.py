@@ -14,7 +14,7 @@ vk_api = vk.API(session)
 
 sched = BlockingScheduler()
 
-@sched.scheduled_job('cron', hour=9, minute=00)  # запускать c понедельника по пятницу в 10.00
+# @sched.scheduled_job('cron', hour=18, minute=56)  # запускать c понедельника по пятницу в 10.00
 def scheduled_job_morning():
     server_posts = requests.get('http://localhost:5000/get_db').json()
     random_id = int(round(time.time()))
@@ -26,11 +26,11 @@ def scheduled_job_morning():
             if post["time"] == "morning":
                 attachment = ""
                 for index in post["attachments"]:
-                    attachment += index + ","
+                    attachment += index + ""
                 vk_api.messages.send(chat_id=1, message=post["text"],attachment=attachment, random_id=random_id,v=5.103)
 
 @sched.scheduled_job('cron', hour=12, minute=00)  # запускать c понедельника по пятницу в 10.00
-def scheduled_job_morning():
+def scheduled_job_afternon():
     server_posts = requests.get('http://localhost:5000/get_db').json()
     random_id = int(round(time.time()))
     posts = server_posts["posts"]
@@ -45,7 +45,7 @@ def scheduled_job_morning():
                 vk_api.messages.send(chat_id=1, message=post["text"],attachment=attachment, random_id=random_id,v=5.103)
 
 @sched.scheduled_job('cron', hour=18, minute=00)  # запускать c понедельника по пятницу в 10.00
-def scheduled_job_morning():
+def scheduled_job_evening():
     server_posts = requests.get('http://localhost:5000/get_db').json()
     random_id = int(round(time.time()))
     posts = server_posts["posts"]
@@ -60,5 +60,5 @@ def scheduled_job_morning():
                 vk_api.messages.send(chat_id=1, message=post["text"],attachment=attachment, random_id=random_id,v=5.103)
 
 
-# scheduled_job_morning()
-sched.start()
+scheduled_job_morning()
+# sched.start()
