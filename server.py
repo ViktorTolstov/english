@@ -31,13 +31,13 @@ vk_api = vk.API(session)
 
 # print(vk_api.messages.getConversations(v=5.103))
 
-@app.route('/', methods=['POST', 'GET'])
+#@app.route('/', methods=['POST', 'GET'])
 def init():
 	body = request.get_json()
 	if body == { "type": "confirmation", "group_id": 188996934 }:
 		return "8806c6d6"
 
-# @app.route('/', methods=['POST', 'GET'])
+@app.route('/', methods=['POST', 'GET'])
 def bot():
     body = request.get_json()
     user_id = body["object"]["message"]["from_id"]
